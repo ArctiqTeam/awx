@@ -316,6 +316,7 @@ spec:
   selector:
     name: {{ kubernetes_deployment_name }}-web-deploy
 {% if kubernetes_context is defined %}
+{% if ingress %}
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -326,6 +327,7 @@ spec:
   backend:
     serviceName: {{ kubernetes_deployment_name }}-web-svc
     servicePort: 80
+{% endif %}
 {% endif %}
 {% if openshift_host is defined %}
 ---

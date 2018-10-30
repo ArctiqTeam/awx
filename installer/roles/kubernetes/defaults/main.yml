@@ -1,4 +1,5 @@
 ---
+ingress: false
 dockerhub_version: "{{ lookup('file', playbook_dir + '/../VERSION') }}"
 create_preload_data: True
 
