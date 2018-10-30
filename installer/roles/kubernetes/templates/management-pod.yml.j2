@@ -6,6 +6,18 @@ metadata:
   namespace: {{ kubernetes_namespace }}
 spec:
   containers:
+    - name: cloudsql-proxy
+      image: gcr.io/cloudsql-docker/gce-proxy:1.11
+      command: ["/cloud_sql_proxy",
+                "-instances={{ gcp_sql_instance_connection }}=tcp:5432",
+                "-credential_file=/secrets/cloudsql/credentials.json"]
+      securityContext:
+        runAsUser: 2  # non-root user
+        allowPrivilegeEscalation: false
+      volumeMounts:
+        - name: cloudsql-instance-credentials
+          mountPath: /secrets/cloudsql
+          readOnly: true
     - name: ansible-tower-management
       image: "{{ kubernetes_task_image }}:{{ kubernetes_task_version }}"
       command: ["sleep", "infinity"]
@@ -18,6 +30,10 @@ spec:
           mountPath: "/etc/tower/conf.d/"
           readOnly: true
   volumes:
+    - name: cloudsql-instance-credentials
+      secret:
+        secretName: awx-db-instance
+
     - name: {{ kubernetes_deployment_name }}-application-config
       configMap:
         name: {{ kubernetes_deployment_name }}-config

@@ -127,6 +127,18 @@ spec:
       serviceAccountName: awx
       terminationGracePeriodSeconds: 10
       containers:
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.11
+          command: ["/cloud_sql_proxy",
+                    "-instances={{ gcp_sql_instance_connection }}=tcp:5432",
+                    "-credential_file=/secrets/cloudsql/credentials.json"]
+          securityContext:
+            runAsUser: 2  # non-root user
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql
+              readOnly: true
         - name: {{ kubernetes_deployment_name }}-web
           image: "{{ kubernetes_web_image }}:{{ kubernetes_web_version }}"
           imagePullPolicy: Always
@@ -259,6 +271,10 @@ spec:
               memory: "{{ memcached_mem_request }}Gi"
               cpu: "{{ memcached_cpu_request }}m"
       volumes:
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: awx-db-instance
+
         - name: {{ kubernetes_deployment_name }}-application-config
           configMap:
             name: {{ kubernetes_deployment_name }}-config
