@@ -339,7 +339,13 @@ kind: Ingress
 metadata:
   name: {{ kubernetes_deployment_name }}-web-svc
   namespace: {{ kubernetes_namespace }}
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "awx-ip"
 spec:
+{% if tls %}
+  tls:
+  - secretName: awx-tls
+{% endif %}
   backend:
     serviceName: {{ kubernetes_deployment_name }}-web-svc
     servicePort: 80
