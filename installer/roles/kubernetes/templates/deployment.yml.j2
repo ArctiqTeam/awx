@@ -341,6 +341,7 @@ metadata:
   namespace: {{ kubernetes_namespace }}
   annotations:
     kubernetes.io/ingress.global-static-ip-name: "awx-ip"
+    kubernetes.io/ingress.allow-http: "false"
 spec:
 {% if tls %}
   tls:
